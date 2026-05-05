@@ -56,9 +56,7 @@ Feature: View course participants
 
   @javascript
   Scenario: Use select and deselect all buttons
-    Given I log in as "teacher1x"
-    And I am on "Course 1" course homepage
-    And I navigate to course participants
+    Given I am on the "Course 1" "enrolled users" page logged in as "teacher1x"
     When I click on "Select all" "checkbox"
     Then the field "Select 'Teacher 1x'" matches value "1"
     And the field "Select 'Student 0x'" matches value "1"
@@ -111,8 +109,7 @@ Feature: View course participants
     And the following "course enrolments" exist:
       | user      | course | role           |
       | student19x | C1     | student |
-    And I am on "Course 1" course homepage
-    And I navigate to course participants
+    And I am on the "Course 1" "enrolled users" page
     And I follow "Email address"
     When I click on "2" "link" in the "//nav[@aria-label='Page']" "xpath_element"
     Then I should not see "student0x@example.com"
@@ -130,9 +127,7 @@ Feature: View course participants
     Given the following "course enrolments" exist:
       | user      | course | role    |
       | student19x | C1     | student |
-    When I log in as "teacher1x"
-    And I am on "Course 1" course homepage
-    And I navigate to course participants
+    When I am on the "Course 1" "enrolled users" page logged in as "teacher1x"
     And I click on "Select all" "checkbox"
     Then I should not see "Student 9x"
     And the field "Select 'Teacher 1x'" matches value "1"

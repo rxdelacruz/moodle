@@ -79,8 +79,7 @@ Feature: Cohort enrolment management
     And the "removeselect[]" select box should contain "Jane Doe (s4@example.com)"
     And the "removeselect[]" select box should not contain "John Smith (s2@example.com)"
     And I trigger cron
-    And I am on "Course 001" course homepage
-    And I navigate to course participants
+    And I am on the "Course 001" "enrolled users" page
     # Verifies students 1 and 4 are in the cohort and student 2 is not any more.
     And the following should exist in the "participants" table:
       | First name             | Email address  | Roles   | Groups        |

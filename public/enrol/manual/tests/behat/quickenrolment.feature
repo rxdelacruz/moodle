@@ -185,8 +185,7 @@ Feature: Teacher can search and enrol users one by one into the course
     # Remove identity field in setting User policies
     And the following config values are set as admin:
       | showuseridentity | idnumber,email,phone1,phone2,department,institution |
-    And I am on "Course 001" course homepage
-    And I navigate to course participants
+    And I am on the "Course 001" "enrolled users" page
     And I press "Enrol users"
     And I click on "Select users" "field"
     And I type "student100@example.com"
