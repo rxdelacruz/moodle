@@ -12,4 +12,12 @@
  * @copyright  2015 Damyon Wiese <damyon@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @since      2.9
- */const e=M.cfg;var n=e;const r=e.jsrev!==-1;export{n as default,r as isJSCachingEnabled};
+ */
+const config = M.cfg;
+var config_default = config;
+const isJSCachingEnabled = config.jsrev !== -1;
+export {
+  config_default as default,
+  isJSCachingEnabled
+};
+//# sourceMappingURL=config.dev.js.map
