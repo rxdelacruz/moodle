@@ -69,7 +69,7 @@ export default class BulkActions {
             this.maxButtons = maxButtons;
         }
         // Register and handle the item select change event.
-        this.registerItemSelectChangeEvent(async() => {
+        const onItemSelectChange = async() => {
             this.selectedItems = this.getSelectedItems();
             if (this.selectedItems.length > 0) { // At least one item is selected.
                 // If the bulk actions mode is already enabled only update the selected items count.
@@ -81,7 +81,14 @@ export default class BulkActions {
             } else { // No items are selected, disable the bulk action mode.
                 this.disableBulkActionsMode();
             }
-        });
+        };
+
+        this.registerItemSelectChangeEvent(onItemSelectChange);
+
+        // If items are already selected when the bulk actions code loads, enable bulk actions immediately.
+        if (this.getSelectedItems().length > 0) {
+            onItemSelectChange();
+        }
     }
 
     /**
