@@ -107,4 +107,37 @@ final class session_redis_cluster_test extends \advanced_testcase {
         $this->assertDebuggingCalledCount(3);
         $this->assertStringContainsString($expected, $actual);
     }
+
+    /**
+     * Test handling of unresolvable Redis cluster hosts.
+     *
+     * Ensures connection failures are logged via debugging() and result in a
+     * RedisClusterException without emitting PHP warnings.
+     *
+     * @covers \core\session\redis::init
+     */
+    public function test_unresolvable_cluster_host_does_not_emit_a_warning(): void {
+        global $CFG;
+
+        $CFG->session_redis_host = 'does-not-exist.invalid:6379,does-not-exist-2.invalid:6379';
+
+        $rediscluster = new redis_session();
+        try {
+            $rediscluster->init();
+            $this->fail('Expected RedisClusterException when cluster seeds are unresolvable.');
+        } catch (RedisClusterException $e) {
+            $this->assertStringContainsString(
+                'does-not-exist.invalid:6379,does-not-exist-2.invalid:6379',
+                $e->getMessage(),
+            );
+        }
+
+        $messages = $this->getDebuggingMessages();
+        $this->assertCount(3, $messages, 'All 3 connection retry attempts should be logged via debugging()');
+        $this->assertStringContainsString(
+            'does-not-exist.invalid:6379,does-not-exist-2.invalid:6379',
+            $messages[0]->message,
+        );
+        $this->resetDebugging();
+    }
 }

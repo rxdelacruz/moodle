@@ -151,4 +151,41 @@ final class cachestore_redis_test extends \cachestore_tests {
         $store = $this->create_cachestore_redis();
         $this::assertTrue($store->is_ready());
     }
+
+    /**
+     * Test handling of an unresolvable Redis cache host.
+     *
+     * Ensures connection failures are logged via debugging() and the cache store
+     * is marked as not ready without emitting PHP warnings.
+     *
+     * @covers \cachestore_redis::initialise
+     * @covers \cachestore_redis::is_ready
+     */
+    public function test_it_handles_unresolvable_host_without_warning(): void {
+        global $DB;
+
+        $definition = definition::load_adhoc(
+            mode: store::MODE_APPLICATION,
+            component: 'cachestore_redis',
+            area: 'phpunit_test',
+        );
+
+        $config = [
+            'server' => 'does-not-exist.invalid',
+            'prefix' => $DB->get_prefix(),
+            'clustermode' => false,
+        ];
+
+        $store = new cachestore_redis('TestBadHost', $config);
+        $store->initialise($definition);
+        $this->assertFalse($store->is_ready());
+
+        $messages = $this->getDebuggingMessages();
+        $this->assertCount(1, $messages, 'Connection failure should be logged via debugging()');
+        $this->assertStringContainsString(
+            'does-not-exist.invalid:6379',
+            $messages[0]->message,
+        );
+        $this->resetDebugging();
+    }
 }
