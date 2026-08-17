@@ -587,4 +587,38 @@ final class redis_test extends \advanced_testcase {
         // Check the session with db auth plugin was not destroyed.
         $this->assertTrue($session->session_exists('id2'));
     }
+
+    /**
+     * Test handling of an unresolvable Redis host.
+     *
+     * Ensures connection failures are logged via debugging() and result in a
+     * RedisException without emitting PHP warnings.
+     *
+     * @covers \core\session\redis::init
+     */
+    public function test_unresolvable_host_does_not_emit_a_warning(): void {
+        global $CFG;
+
+        $CFG->session_redis_host = 'does-not-exist.invalid';
+        $CFG->session_redis_port = 6379;
+
+        $sess = new \core\session\redis();
+        try {
+            $sess->init();
+            $this->fail('Expected RedisException when host is unresolvable.');
+        } catch (\RedisException $e) {
+            $this->assertStringContainsString(
+                'does-not-exist.invalid:6379',
+                $e->getMessage(),
+            );
+        }
+
+        $messages = $this->getDebuggingMessages();
+        $this->assertCount(3, $messages, 'All 3 connection retry attempts should be logged via debugging()');
+        $this->assertStringContainsString(
+            'does-not-exist.invalid:6379',
+            $messages[0]->message,
+        );
+        $this->resetDebugging();
+    }
 }
