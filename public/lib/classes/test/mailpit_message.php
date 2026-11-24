@@ -108,7 +108,7 @@ class mailpit_message implements message {
             sender: $message->From,
             subject: $message->Subject,
             recipients: $message->To,
-            cc: $message->Cc,
+            cc: $message->Cc ?? [],
             attachmentcount: $message->Attachments,
         );
 
