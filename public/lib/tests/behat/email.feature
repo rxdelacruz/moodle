@@ -6,9 +6,10 @@ Feature: Testing Email Functionality
 
   Scenario: Verifying email content to user
     When the following emails have been sent:
-      | to                   | subject           | message                |
-      | student1@example.com | A testing subject | This is a test message |
-    Then the email to "student1@example.com" with subject containing "A testing subject" should contain "This is a test message"
+      | to                   | subject           | message                                                                    |
+      | student1@example.com | A testing subject | This is a longer test message with specific content for the test.          |
+    Then the email to "student1@example.com" with subject containing "A testing subject" should contain "longer test message"
+    And the email to "student1@example.com" with subject containing "A testing subject" should not contain "not part of this message"
 
   Scenario: Test emptying the email inbox
     When the following emails have been sent:

@@ -129,18 +129,20 @@ class behat_email extends behat_base {
      * Verifies the content of an email sent to a specific user and subject.
      *
      * @Given the email to :user with subject containing :subject should contain :content
+     * @Given the email to :user with subject containing :subject should :not contain :content
      *
      * @param string $user The user to check for.
      * @param string $subject The subject to check for.
      * @param string $content The content to check for.
+     * @param string|null $not If set, the content should not be present.
      */
-    public function verify_email_content(string $user, string $subject, string $content): void {
+    public function verify_email_content(string $user, string $subject, string $content, ?string $not = null): void {
         $messages = $this->get_messages_matching_address_and_subject($user, $subject);
 
         $count = 0;
         foreach ($messages as $message) {
             $count++;
-            $this->validate_data('content', $message, $content);
+            $this->validate_data('content', $message, $content, $not);
         }
 
         if ($count === 0) {
@@ -242,11 +244,13 @@ class behat_email extends behat_base {
      * @param string $field The field to validate.
      * @param message $message The expected value.
      * @param string $expected The actual value.
+     * @param string|null $not If set, the expected value should not be present.
      */
     private function validate_data(
         string $field,
         message $message,
         string $expected,
+        ?string $not = null,
     ): void {
         switch ($field) {
             case 'user':
@@ -267,7 +271,7 @@ class behat_email extends behat_base {
                 );
             case 'subject':
                 $actual = $message->get_subject();
-                if (str_contains($expected, $actual)) {
+                if (str_contains($actual, $expected)) {
                     return;
                 }
                 throw new ExpectationException(
@@ -280,17 +284,19 @@ class behat_email extends behat_base {
                     $this->getSession(),
                 );
             case 'content':
-                if (str_contains($expected, $message->get_body_text())) {
-                    return;
-                }
-                if (str_contains($expected, $message->get_body_html())) {
+                $contains = str_contains($message->get_body_text(), $expected)
+                    || str_contains($message->get_body_html(), $expected);
+                $shouldcontain = $not === null;
+                if ($contains === $shouldcontain) {
                     return;
                 }
                 throw new ExpectationException(
                     sprintf(
-                        'Expected %s to contain %s, but it does not. Actual text was:\n%s\nActual HTML content was:\n%s\n',
+                        'Expected %s to %s %s, but it %s. Actual text was:\n%s\nActual HTML content was:\n%s\n',
                         $field,
+                        $shouldcontain ? 'contain' : 'not contain',
                         $expected,
+                        $shouldcontain ? 'does not' : 'does',
                         $message->get_body_text(),
                         $message->get_body_html(),
                     ),
